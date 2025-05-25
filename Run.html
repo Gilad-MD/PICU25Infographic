@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אינפוגרפיקה: רופאי טיפול נמרץ ילדים ואחיות אחראיות בישראל</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+    <!--
+    Infographic Plan & Narrative Structure for "רופאי טיפול נמרץ ילדים ואחיות אחראיות בישראל - 25/05/25":
+    1. Header: Title - "Pediatric ICU Professionals & Head Nurses in Israel". Subtitle - "Directory Overview - Updated 25/05/2025".
+    2. Section 1: Key Statistics Overview.
+        - Intro: Brief statement on the scope of the directory.
+        - Data: Total professionals, total unique medical centers, total unique unified roles.
+        - Goal: Inform.
+        - Visualization: "Single Big Number" (styled HTML text cards).
+        - Justification: Clearly presents key aggregate figures from the directory. Method: HTML/Tailwind. NO SVG.
+    3. Section 2: Professionals by Medical Center.
+        - Intro: Understanding the distribution of specialists across different hospitals.
+        - Data: Count of professionals per medical center.
+        - Goal: Compare.
+        - Visualization: Horizontal Bar Chart (Chart.js).
+        - Justification: Best for comparing quantities across numerous distinct categories (medical centers). Horizontal layout aids readability of center names. Labels will be wrapped if >16 chars. Method: Chart.js (Canvas). NO SVG.
+    4. Section 3: Distribution of Professional Roles.
+        - Intro: Examining the composition of roles within this specialized field.
+        - Data: Count of professionals per unified role (e.g., מנהל/ת, מומחה/ית, מתמחה, אח/ות אחראי/ת). Gendered roles are unified.
+        - Goal: Compare (composition).
+        - Visualization: Donut Chart (Chart.js).
+        - Justification: Effectively shows the proportion of each role. Labels wrapped if >16 chars. Method: Chart.js (Canvas). NO SVG.
+    5. Section 4: Top Medical Centers by Number of Listed Professionals.
+        - Intro: Highlighting the medical centers with the largest teams of listed pediatric ICU professionals.
+        - Data: Top 7 medical centers sorted by the number of professionals.
+        - Goal: Organize (ranking) & Compare.
+        - Visualization: Ordered Vertical Bar Chart (Chart.js).
+        - Justification: Clearly ranks centers by volume. Vertical bars are suitable for a smaller number of categories. Labels wrapped if >16 chars. Method: Chart.js (Canvas). NO SVG.
+    6. Footer: Data source acknowledgement (implicitly the provided PDF).
+
+    Chosen Color Palette Name: "Professional Blues & Teal"
+    - Background: bg-slate-100 (#F1F5F9)
+    - Card Background: bg-white
+    - Primary Text: #1E3A8A (Dark Blue)
+    - Heading Text: #1E40AF (Slightly Lighter Dark Blue)
+    - Chart Palette Base (Tailwind Blue & Teal shades):
+        - Main: #2563EB (blue-600)
+        - Secondary: #3B82F6 (blue-500)
+        - Accent 1: #60A5FA (blue-400)
+        - Accent 2: #93C5FD (blue-300)
+        - Teal Accent: #14B8A6 (teal-500)
+        - Highlight/Contrast (Optional): #F59E0B (amber-500)
+    This selection aims for a professional, trustworthy feel appropriate for medical data, with enough vibrancy for an infographic.
+    -->
+    <style>
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #F1F5F9; /* bg-slate-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 10px;
+        }
+        .main-title { color: #1E40AF; }
+        .section-title { color: #1E3A8A; }
+        .card-content { color: #374151; } /* gray-700 */
+        .stat-number { color: #2563EB; } /* blue-600 */
+        .stat-label { color: #4B5563; } /* gray-600 */
+
+        /* Responsive height for chart containers */
+        .h-chart-sm { height: 300px; max-height: 350px; } /* Mobile */
+        @media (min-width: 768px) { /* md */
+            .h-chart-md { height: 400px; max-height: 450px; }
+        }
+        @media (min-width: 1024px) { /* lg */
+            .h-chart-lg { height: 450px; max-height: 500px; }
+        }
+         .horizontal-bar-chart-container {
+            height: 600px; /* Default height, can be adjusted */
+            max-height: 800px; /* Max height */
+        }
+        @media (min-width: 768px) { /* md */
+            .horizontal-bar-chart-container {
+                height: 800px;
+                max-height: 1000px;
+            }
+        }
+        @media (min-width: 1024px) { /* lg */
+             .horizontal-bar-chart-container {
+                height: 1000px; /* Adjust as needed for many labels */
+                max-height: 1200px;
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-slate-100 text-gray-800">
+
+    <header class="bg-white shadow-md py-8 text-center">
+        <h1 class="text-4xl font-bold main-title">רופאי טיפול נמרץ ילדים ואחיות אחראיות בישראל</h1>
+        <p class="text-xl text-gray-600 mt-2">סקירת נתונים מתוך הרשימה המעודכנת ל-25/05/2025</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="key-stats" class="mb-12">
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h2 class="text-3xl font-semibold section-title mb-6 text-center">נתוני מפתח</h2>
+                <p class="text-lg card-content mb-8 text-center">להלן סקירה של הנתונים המרכזיים העולים מתוך רשימת אנשי המקצוע בתחום הטיפול הנמרץ ילדים בישראל. נתונים אלו מספקים תמונה כללית על היקף כוח האדם והפריסה הארגונית בתחום חשוב זה.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                    <div class="bg-slate-50 p-6 rounded-lg shadow">
+                        <p id="total-professionals" class="text-5xl font-bold stat-number">-</p>
+                        <p class="text-lg stat-label mt-2">אנשי מקצוע ברשימה</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg shadow">
+                        <p id="total-centers" class="text-5xl font-bold stat-number">-</p>
+                        <p class="text-lg stat-label mt-2">מרכזים רפואיים ייחודיים</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg shadow sm:col-span-2 lg:col-span-1">
+                        <p id="total-roles" class="text-5xl font-bold stat-number">-</p>
+                        <p class="text-lg stat-label mt-2">סוגי תפקידים (מאוחדים) ייחודיים</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="professionals-by-center" class="mb-12">
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h2 class="text-3xl font-semibold section-title mb-6 text-center">התפלגות אנשי מקצוע לפי מרכז רפואי</h2>
+                <p class="text-lg card-content mb-8 text-center">תרשים זה מציג את מספר אנשי המקצוע הרשומים בכל מרכז רפואי. הנתונים מאפשרים לזהות את המרכזים עם הריכוז הגבוה ביותר של מומחים בתחום טיפול נמרץ ילדים, ומסייעים להבין את פריסת השירותים ברמה הארצית.</p>
+                <div class="chart-container horizontal-bar-chart-container">
+                    <canvas id="professionalsByCenterChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="roles-distribution" class="mb-12">
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h2 class="text-3xl font-semibold section-title mb-6 text-center">התפלגות תפקידים (מאוחדים)</h2>
+                <p class="text-lg card-content mb-8 text-center">תרשים זה ממחיש את החלוקה היחסית של התפקידים השונים, לאחר איחוד תפקידים מגדריים (למשל, מנהל/ת, אח/ות אחראי/ת), בקרב אנשי המקצוע הרשומים. ההתפלגות מספקת תובנות לגבי הרכב כוח האדם בתחום.</p>
+                <div class="chart-container h-chart-sm md:h-chart-md lg:h-chart-lg max-w-lg mx-auto">
+                    <canvas id="rolesDistributionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="top-centers" class="mb-12">
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h2 class="text-3xl font-semibold section-title mb-6 text-center">מרכזים רפואיים מובילים לפי מספר אנשי מקצוע</h2>
+                <p class="text-lg card-content mb-8 text-center">התרשים הבא מציג את שבעת המרכזים הרפואיים עם המספר הגבוה ביותר של אנשי מקצוע בתחום טיפול נמרץ ילדים, כפי שעולה מהרשימה. דירוג זה מדגיש את המוסדות המרכזיים המספקים שירותים אלו בהיקף נרחב.</p>
+                <div class="chart-container h-chart-sm md:h-chart-md lg:h-chart-lg max-w-2xl mx-auto">
+                    <canvas id="topCentersChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 bg-slate-200 text-gray-600">
+        <p>הנתונים מבוססים על רשימת רופאי טיפול נמרץ ילדים ואחיות אחראיות בישראל, מעודכנת ל-25/05/2025.</p>
+        <p>אינפוגרפיקה זו נוצרה למטרות הדגמה וניתוח נתונים.</p>
+    </footer>
+
+    <script>
+        const professionalData = [
+            { שם: "אפרים שדות", תפקיד: "מנהל", "מרכז רפואי": "לא צוין", "טלפון נייד": "0527360022", "דואר אלקטרוני": "efraims@tlvmc.gov.il" },
+            { שם: "שירלי פרידמן", תפקיד: "מומחית", "מרכז רפואי": "לא צוין", "טלפון נייד": "0527360423", "דואר אלקטרוני": "shifri@gmail.com" },
+            { שם: "איתי איילון", תפקיד: "מומחה", "מרכז רפואי": "איכילוב", "טלפון נייד": "0587717469", "דואר אלקטרוני": "itayayalon@gmail.com" },
+            { שם: "סמדר מנהיים", תפקיד: "מתמחה", "מרכז רפואי": "איכילוב", "טלפון נייד": "0585885123", "דואר אלקטרוני": "smadarman88@gmail.com" },
+            { שם: "בלה ברכר", תפקיד: "אחות אחראית", "מרכז רפואי": "איכילוב", "טלפון נייד": "0509226573", "דואר אלקטרוני": "bellabr@tlvmc.gov.il" },
+            { שם: "נועה רוזנפלד", תפקיד: "מנהלת", "מרכז רפואי": "אסותא אשדוד", "טלפון נייד": "0524305633", "דואר אלקטרוני": "rosenfeldnoa@gmail.com" },
+            { שם: "מוטי עיני", תפקיד: "מומחה", "מרכז רפואי": "אסותא אשדוד", "טלפון נייד": "0523551876, 0542932535", "דואר אלקטרוני": "motti.eini@gmail.com" },
+            { שם: "אביעד רוזנברג", תפקיד: "מומחה", "מרכז רפואי": "אסותא אשדוד", "טלפון נייד": "0523551876, 0542932535", "דואר אלקטרוני": "aviad.rosenberg@gmail.com" },
+            { שם: "מרינה מלצר", תפקיד: "אחות אחראית", "מרכז רפואי": "אסותא אשדוד", "טלפון נייד": "0528464039", "דואר אלקטרוני": "mariname@assuta.co.il" },
+            { שם: "איברהים אבו קישק", תפקיד: "מנהל", "מרכז רפואי": "אסף הרופא", "טלפון נייד": "0537346175", "דואר אלקטרוני": "abukishk_i@yahoo.com" },
+            { שם: "רוני בארי", תפקיד: "מומחית", "מרכז רפואי": "אסף הרופא", "טלפון נייד": "0507209150, 0542474033, 0505191318", "דואר אלקטרוני": "ronyberkowiz@gmail.com" },
+            { שם: "מיטל בן ארי", תפקיד: "מתמחה", "מרכז רפואי": "אסף הרופא", "טלפון נייד": "0507209150, 0542474033, 0505191318", "דואר אלקטרוני": "meital.benari@gmail.com" },
+            { שם: "טל כנרי", תפקיד: "אחות אחראית", "מרכז רפואי": "אסף הרופא", "טלפון נייד": "0507209150, 0542474033, 0505191318", "דואר אלקטרוני": "talka@asaf.health.gov.il" },
+            { שם: "מיכאל קלינין", תפקיד: "מנהל", "מרכז רפואי": "ברזילי", "טלפון נייד": "0545911674, 0537678989, 0523091290", "דואר אלקטרוני": "michaelk1@bmc.gov.il, kalinin72@gmail.com" },
+            { שם: "לודמילה גניש", תפקיד: "אחות אחראית", "מרכז רפואי": "ברזילי", "טלפון נייד": "0545911674, 0537678989, 0523091290", "דואר אלקטרוני": "ludmilage@bmc.gov.il" },
+            { שם: "אורי פולק", תפקיד: "מנהל", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0507874277", "דואר אלקטרוני": "uripol@hadassah.org.il" },
+            { שם: "אסף מנדל", תפקיד: "מומחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0508573267", "דואר אלקטרוני": "asafmandel@gmail.com" },
+            { שם: "דייויד קלייד", תפקיד: "מומחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0545743470", "דואר אלקטרוני": "picudocs.dk@gmail.com" },
+            { שם: "עדי ארן", תפקיד: "מומחית", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0526167973", "דואר אלקטרוני": "adiavnaran@gmail.com" },
+            { שם: "שעיה לנגר", תפקיד: "מומחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0523809066", "דואר אלקטרוני": "langeria@gmail.com" },
+            { שם: "מריאן נליס", תפקיד: "מומחית", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0506590293", "דואר אלקטרוני": "maelnellis@gmail.com" },
+            { שם: "סלמאס וותד", תפקיד: "מומחית", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0508519506", "דואר אלקטרוני": "salmas.watad@gmail.com" },
+            { שם: "נתאלי ברסום", תפקיד: "מתמחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0543266868", "דואר אלקטרוני": "nataliebarsoum@gmail.com" },
+            { שם: "אשל ניר", תפקיד: "מתמחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0587729093", "דואר אלקטרוני": "eshela.nir@mail.huji.ac.il" },
+            { שם: "איתן בסקין", תפקיד: "מתמחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0506763103", "דואר אלקטרוני": "eytan1026@gmail.com" },
+            { שם: "פאולינה פיגוארה", תפקיד: "מתמחה", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0505172062, 0504645893", "דואר אלקטרוני": "paufigueroa91@gmail.com" },
+            { שם: "מור לוי", תפקיד: "אחות אחראית", "מרכז רפואי": "הדסה עין כרם", "טלפון נייד": "0505172062, 0504645893", "דואר אלקטרוני": "morlevy@hadassah.org.il" },
+            { שם: "רבקה ברוקס", תפקיד: "מנהלת", "מרכז רפואי": "הדסה הר הצופים", "טלפון נייד": "0508573534, 0587642097", "דואר אלקטרוני": "rebeccab@hadassah.org.il" },
+            { שם: "שרלוט גליקסמן", תפקיד: "מומחית", "מרכז רפואי": "הדסה הר הצופים", "טלפון נייד": "0508573534, 0587642097", "דואר אלקטרוני": "chives57@gmail.com" },
+            { שם: "עזרא ויינבלט", תפקיד: "מומחה", "מרכז רפואי": "הדסה הר הצופים", "טלפון נייד": "0535342752, +1-786-7978341, 0528900024", "דואר אלקטרוני": "ezra.weinblatt@gmail.com" },
+            { שם: "Isaac Manaster", תפקיד: "מומחה", "מרכז רפואי": "הדסה הר הצופים", "טלפון נייד": "0535342752, +1-786-7978341, 0528900024", "דואר אלקטרוני": "isaacmanaster@gmail.com" },
+            { שם: "אירנה לבדקו", תפקיד: "אחות אחראית", "מרכז רפואי": "הדסה הר הצופים", "טלפון נייד": "0535342752, +1-786-7978341, 0528900024", "דואר אלקטרוני": "19miu75@gmail.com" },
+            { שם: "היתם שלבי", תפקיד: "מנהל", "מרכז רפואי": "הלל יפה", "טלפון נייד": "0505531491, 0546979166", "דואר אלקטרוני": "haytems@hymc.gov.il" },
+            { שם: "אולגה ויוננקו", תפקיד: "אחות אחראית", "מרכז רפואי": "הלל יפה", "טלפון נייד": "0505531491, 0546979166", "דואר אלקטרוני": "לא צוין" },
+            { שם: "רחל שיאון", תפקיד: "מנהלת", "מרכז רפואי": "וולפסון", "טלפון נייד": "0525515279", "דואר אלקטרוני": "almasarid@gmail.com" },
+            { שם: "יאיר אראל", תפקיד: "מומחה", "מרכז רפואי": "וולפסון", "טלפון נייד": "0507315605", "דואר אלקטרוני": "yairerell@gmail.com" },
+            { שם: "אורן ציפר", תפקיד: "מומחה", "מרכז רפואי": "וולפסון", "טלפון נייד": "0547734427", "דואר אלקטרוני": "orenzipper@gmail.com" },
+            { שם: "לירון תלמי", תפקיד: "מומחית", "מרכז רפואי": "וולפסון", "טלפון נייד": "0528305520, 0502213660", "דואר אלקטרוני": "tsufbuba@gmail.com" },
+            { שם: "אירנה רובינוב", תפקיד: "אחות אחראית", "מרכז רפואי": "וולפסון", "טלפון נייד": "0528305520, 0502213660", "דואר אלקטרוני": "irenar@wmc.gov.il" },
+            { שם: "דגנית אדם", תפקיד: "מנהלת", "מרכז רפואי": "מאיר", "טלפון נייד": "0505666910", "דואר אלקטרוני": "dganitadam2@gmail.com" },
+            { שם: "ברק מידן", תפקיד: "מומחה", "מרכז רפואי": "מאיר", "טלפון נייד": "0524498929", "דואר אלקטרוני": "barakmeidan@gmail.com" },
+            { שם: "מירי קידר", תפקיד: "מומחית", "מרכז רפואי": "מאיר", "טלפון נייד": "0525070660", "דואר אלקטרוני": "mdmiriam@yahoo.com" },
+            { שם: "אורנה הדרי", תפקיד: "אחות אחראית", "מרכז רפואי": "מאיר", "טלפון נייד": "0523363997", "דואר אלקטרוני": "ornahadari@gmail.com" },
+            { שם: "חיים ביבי", תפקיד: "מנהל", "מרכז רפואי": "מעייני הישועה", "טלפון נייד": "0522599461", "דואר אלקטרוני": "haim_76407@yahoo.com" },
+            { שם: "חיה רוזנבלט", תפקיד: "אחות אחראית", "מרכז רפואי": "מעייני הישועה", "טלפון נייד": "0506711038", "דואר אלקטרוני": "chayao@mhmc.co.il" },
+            { שם: "יואב הופמן", תפקיד: "מנהל", "מרכז רפואי": "נהריה", "טלפון נייד": "0507887543", "דואר אלקטרוני": "yoavhofman@gmail.com" },
+            { שם: "עביר איוב", תפקיד: "מומחית", "מרכז רפואי": "נהריה", "טלפון נייד": "0544951744", "דואר אלקטרוני": "abeer.ayoub11@gmail.com" },
+            { שם: "נעמה שחר", תפקיד: "אחות אחראית", "מרכז רפואי": "נהריה", "טלפון נייד": "0507887465", "דואר אלקטרוני": "naamas@gmc.gov.il" },
+            { שם: "אחמד חאג'", תפקיד: "מנהל", "מרכז רפואי": "נצרת (צרפתי)", "טלפון נייד": "0525776080, 0502062797", "דואר אלקטרוני": "ahmd.tamra@gmail.com" },
+            { שם: "אליאן חורי", תפקיד: "אחות אחראית", "מרכז רפואי": "נצרת (צרפתי)", "טלפון נייד": "0525776080, 0502062797", "דואר אלקטרוני": "elian.kh.80@gmail.com" },
+            { שם: "יצחק לזר", תפקיד: "מנהל", "מרכז רפואי": "סורוקה", "טלפון נייד": "0526418695", "דואר אלקטרוני": "ilazar@bgu.ac.il" },
+            { שם: "דני גולן", תפקיד: "מומחה", "מרכז רפואי": "סורוקה", "טלפון נייד": "0505698217", "דואר אלקטרוני": "goland@bgu.ac.il" },
+            { שם: "יובל כוורי", תפקיד: "מומחה", "מרכז רפואי": "סורוקה", "טלפון נייד": "0504562280", "דואר אלקטרוני": "cavari@bgu.ac.il" },
+            { שם: "אלי אדהניני", תפקיד: "מתמחה", "מרכז רפואי": "סורוקה", "טלפון נייד": "0543150383", "דואר אלקטרוני": "eli.adhanany@mail.huji.ac.il" },
+            { שם: "אסף אדר", תפקיד: "מתמחה", "מרכז רפואי": "סורוקה", "טלפון נייד": "0523994149", "דואר אלקטרוני": "assafadar@gmail.com" },
+            { שם: "אתי גדז'", תפקיד: "אחות אחראית", "מרכז רפואי": "סורוקה", "טלפון נייד": "050-4124707", "דואר אלקטרוני": "etig@clalit.org.il" },
+            { שם: "גור זמיר", תפקיד: "מנהל", "מרכז רפואי": "עפולה", "טלפון נייד": "0524264346", "דואר אלקטרוני": "goorzamr@gmail.com" },
+            { שם: "טל קליגר", תפקיד: "מומחה", "מרכז רפואי": "עפולה", "טלפון נייד": "0523673263", "דואר אלקטרוני": "tal55kliger@yahoo.com" },
+            { שם: "אפרת שפושניק", תפקיד: "מתמחה", "מרכז רפואי": "עפולה", "טלפון נייד": "0544591974, 0509230679", "דואר אלקטרוני": "efigo100@gmail.com" },
+            { שם: "אודליה עמר", תפקיד: "אחות אחראית", "מרכז רפואי": "עפולה", "טלפון נייד": "0544591974, 0509230679", "דואר אלקטרוני": "odeliaamar1@gmail.com" },
+            { שם: "אמיר בר", תפקיד: "מנהל", "מרכז רפואי": "פוריה", "טלפון נייד": "0506567974", "דואר אלקטרוני": "amir.ab.bar@gmail.com" },
+            { שם: "אחמד אגבריה", תפקיד: "מומחה", "מרכז רפואי": "פוריה", "טלפון נייד": "0508573309", "דואר אלקטרוני": "ahmad_s_i@yahoo.com" },
+            { שם: "גלית דוד", תפקיד: "אחות אחראית", "מרכז רפואי": "פוריה", "טלפון נייד": "0506267532", "דואר אלקטרוני": "gdavid@poria.health.gov.il" },
+            { שם: "יורי וינר", תפקיד: "מנהל", "מרכז רפואי": "צפת", "טלפון נייד": "0508434133", "דואר אלקטרוני": "yori.v@ziv.health.gov.il" },
+            { שם: "הילל פרנקנטל", תפקיד: "מומחה", "מרכז רפואי": "צפת", "טלפון נייד": "0584825159", "דואר אלקטרוני": "hilelpr@gmail.com" },
+            { שם: "ריקי נגר", תפקיד: "אחות אחראית", "מרכז רפואי": "צפת", "טלפון נייד": "0504570855", "דואר אלקטרוני": "rivka.n@ziv.gov.il" },
+            { שם: "אלי שפירו", תפקיד: "מנהל", "מרכז רפואי": "קפלן", "טלפון נייד": "0502114657", "דואר אלקטרוני": "elishap@clalit.org.il" },
+            { שם: "שרית אבישי", תפקיד: "מומחית", "מרכז רפואי": "קפלן", "טלפון נייד": "0506264733", "דואר אלקטרוני": "sarit_a@clalit.org.il" },
+            { שם: "מיכאל צ'יגרינסקי", תפקיד: "מומחה", "מרכז רפואי": "קפלן", "טלפון נייד": "0587122005", "דואר אלקטרוני": "mikhaelch@clalit.org.il" },
+            { שם: "אלבן טבצ'ניק", תפקיד: "מומחה", "מרכז רפואי": "קפלן", "טלפון נייד": "0528359923", "דואר אלקטרוני": "elvantabachnik@gmail.com" },
+            { שם: "לירון כהן", תפקיד: "אחות אחראית", "מרכז רפואי": "קפלן", "טלפון נייד": "0549719862", "דואר אלקטרוני": "lironbo@clalit.org.il" },
+            { שם: "דני איתן", תפקיד: "מנהל", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0502061579", "דואר אלקטרוני": "d_eytan@rambam.health.gov.il" },
+            { שם: "אמיר חדש", תפקיד: "מומחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0502061447", "דואר אלקטרוני": "a_hadash@rambam.health.gov.il" },
+            { שם: "אורי אטיאס", תפקיד: "מומחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0505863716", "דואר אלקטרוני": "o_attias@rambam.health.gov.il" },
+            { שם: "מעין ענתבי", תפקיד: "מומחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0546230514", "דואר אלקטרוני": "maayan66@yahoo.com" },
+            { שם: "וסאם עבוד", תפקיד: "מתמחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0545709501", "דואר אלקטרוני": "wisamaboud@hotmail.com" },
+            { שם: "צליל רגב", תפקיד: "מתמחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0525786131", "דואר אלקטרוני": "tslilr@gmail.com" },
+            { שם: "רימאח יוסף", תפקיד: "מתמחה", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0509224425, 0502061394", "דואר אלקטרוני": "remah.yousef@gmail.com" },
+            { שם: "נשאת חיגאזי", תפקיד: "אח אחראי", "מרכז רפואי": "רמב\"ם", "טלפון נייד": "0509224425, 0502061394", "דואר אלקטרוני": "n_hijaze@rambam.health.gov.il" },
+            { שם: "עופר שילר", תפקיד: "מנהל", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0558858002", "דואר אלקטרוני": "schillero@clalit.org.il" },
+            { שם: "אורית מנור", תפקיד: "מומחית", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0544661124", "דואר אלקטרוני": "oritm@clalit.org.il" },
+            { שם: "ערן שוסטק", תפקיד: "מומחה", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0523691626", "דואר אלקטרוני": "eransho@clalit.org.il" },
+            { שם: "יעל פיינשטיין", תפקיד: "מומחית", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0547969426", "דואר אלקטרוני": "yael_feinstein@yahoo.com" },
+            { שם: "אילה יהב", תפקיד: "מומחית", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0507532172", "דואר אלקטרוני": "ayalayahav@gmail.com" },
+            { שם: "מגדה זומר", תפקיד: "אחות אחראית", "מרכז רפואי": "שניידר לב", "טלפון נייד": "0502299834", "דואר אלקטרוני": "magdais@clalit.org.il" },
+            { שם: "אלחנן נחום", תפקיד: "מנהל", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0503980200", "דואר אלקטרוני": "nahum@clalit.org.il" },
+            { שם: "גילי קדמון", תפקיד: "מומחית", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0585559008", "דואר אלקטרוני": "gilik@clalit.org.il" },
+            { שם: "איתן קפלן", תפקיד: "מומחה", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0505627737", "דואר אלקטרוני": "kaplanei@hotmail.com" },
+            { שם: "אביחי וייסבאך", תפקיד: "מומחה", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0546250271", "דואר אלקטרוני": "weissbac@gmail.com" },
+            { שם: "גל בנשלום", תפקיד: "מתמחה", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0505391123", "דואר אלקטרוני": "galbens@gmail.com" },
+            { שם: "שרה לואיס", תפקיד: "אחות אחראית", "מרכז רפואי": "שניידר כללי", "טלפון נייד": "0508802410", "דואר אלקטרוני": "sarahle@clalit.org.il" },
+            { שם: "ג'אק בראון", תפקיד: "מנהל", "מרכז רפואי": "שערי צדק", "טלפון נייד": "0508573954", "דואר אלקטרוני": "jacmichal@yahoo.com" },
+            { שם: "אמיר זילכה", תפקיד: "מומחה", "מרכז רפואי": "שערי צדק", "טלפון נייד": "0586776021", "דואר אלקטרוני": "azilkha2@gmail.com" },
+            { שם: "יעל ווינטראוב", תפקיד: "מומחית", "מרכז רפואי": "שערי צדק", "טלפון נייד": "0507119943", "דואר אלקטרוני": "weinyael@gmail.com" },
+            { שם: "רומן בס", תפקיד: "לא צוין", "מרכז רפואי": "שערי צדק", "טלפון נייד": "0508685533", "דואר אלקטרוני": "roman_bass@yahoo.com" },
+            { שם: "ורד אחרק כהן", תפקיד: "אחות אחראית", "מרכז רפואי": "שערי צדק", "טלפון נייד": "0508685025", "דואר אלקטרוני": "veredac@szmc.org.il" },
+            { שם: "איתי פסח", תפקיד: "מנהל", "מרכז רפואי": "שיבא", "טלפון נייד": "0526668306", "דואר אלקטרוני": "itai.pessach@sheba.health.gov.il" },
+            { שם: "רעות כסיף לרנר", תפקיד: "מ\"מ מנהל", "מרכז רפואי": "שיבא", "טלפון נייד": "0526667331", "דואר אלקטרוני": "reutkl@gmail.com" },
+            { שם: "גידי פרת", תפקיד: "לא צוין", "מרכז רפואי": "שיבא", "טלפון נייד": "0526667310", "דואר אלקטרוני": "gidi.paret@sheba.health.gov.il" },
+            { שם: "מרינה רובינשטיין", תפקיד: "מומחית", "מרכז רפואי": "שיבא", "טלפון נייד": "0526667312", "דואר אלקטרוני": "marina.rubinshtein@sheba.health.gov.il" },
+            { שם: "טל שדה-ורד", תפקיד: "מומחית", "מרכז רפואי": "שיבא", "טלפון נייד": "0523963396", "דואר אלקטרוני": "sadehtal13@gmail.com" },
+            { שם: "ילנה סקוריחין", תפקיד: "מומחית", "מרכז רפואי": "שיבא", "טלפון נייד": "0526669314", "דואר אלקטרוני": "yelena.skorchin@sheba.health.gov.il" },
+            { שם: "אביתר חוברה", תפקיד: "מומחה", "מרכז רפואי": "שיבא", "טלפון נייד": "0522387832", "דואר אלקטרוני": "evyatarhu@gmail.com" },
+            { שם: "דודו גלעד", תפקיד: "מתמחה (מאוקטובר)", "מרכז רפואי": "שיבא", "טלפון נייד": "0523416000", "דואר אלקטרוני": "dudugilad@gmail.com" },
+            { שם: "אלון אוריון", תפקיד: "מתמחה", "מרכז רפואי": "שיבא", "טלפון נייד": "0528390203", "דואר אלקטרוני": "alonorion@gmail.com" },
+            { שם: "נדב רובין", תפקיד: "מתמחה", "מרכז רפואי": "שיבא", "טלפון נייד": "0525656969, 0544404311, 0526669313", "דואר אלקטרוני": "nadav.rubin@gmail.com" },
+            { שם: "ליאת ארושס", תפקיד: "א. אחראית כללי", "מרכז רפואי": "שיבא", "טלפון נייד": "0525656969, 0544404311, 0526669313", "דואר אלקטרוני": "liat.aroshass@sheba.health.gov.il" },
+            { שם: "זייד נג'אח", תפקיד: "אח אחראי לב", "מרכז רפואי": "שיבא", "טלפון נייד": "0525656969, 0544404311, 0526669313", "דואר אלקטרוני": "nagah.zaid@sheba.health.gov.il" },
+            { שם: "מיכל שיפרין", תפקיד: "לא צוין", "מרכז רפואי": "מומחים ומתמחי-על", "טלפון נייד": "0549434611", "דואר אלקטרוני": "michal shifrin@yahoo.com" },
+            { שם: "היבה אבו אל חיג'ה", תפקיד: "GOSH", "מרכז רפואי": "מומחים ומתמחי-על", "טלפון נייד": "0546603214, 0545988832", "דואר אלקטרוני": "abuelhija.hiba@gmail.com" },
+            { שם: "עידן יואל", תפקיד: "טורונטו", "מרכז רפואי": "מומחים ומתמחי-על", "טלפון נייד": "0546603214, 0545988832", "דואר אלקטרוני": "iyoel87@gmail.com" },
+            { שם: "ניב סופר", תפקיד: "אוסטרליה", "מרכז רפואי": "בחו\"ל", "טלפון נייד": "0544882992", "דואר אלקטרוני": "nivsoffair@gmail.com" },
+            { שם: "רוית זליקסון ספורטה", תפקיד: "אוסטרליה", "מרכז רפואי": "בחו\"ל", "טלפון נייד": "0546476137", "דואר אלקטרוני": "ravitzelikson@gmail.com" },
+            { שם: "טלי טרבולוס-קליין", תפקיד: "אוסטרליה", "מרכז רפואי": "בחו\"ל", "טלפון נייד": "0544550433", "דואר אלקטרוני": "talitarak@gmail.com" },
+            { שם: "אושרי זאלן", תפקיד: "SickKids", "מרכז רפואי": "בחו\"ל", "טלפון נייד": "לא צוין", "דואר אלקטרוני": "לא צוין" },
+            { שם: "אפרת הרלב", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0504613026", "דואר אלקטרוני": "efrathr@clalit.org.il" },
+            { שם: "יוסי בן ארי", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0537482459", "דואר אלקטרוני": "j_benari@rambam.health.gov.il" },
+            { שם: "אמיר ורדי", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0526669310", "דואר אלקטרוני": "amir.vardi@sheba.health.gov.il" },
+            { שם: "עובדי דגן", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0504057157", "דואר אלקטרוני": "ovdidagan@gmail.com" },
+            { שם: "אלדר שניידר", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0526267346", "דואר אלקטרוני": "eldarschna@gmail.com" },
+            { שם: "שיר מלאך", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0524658506", "דואר אלקטרוני": "shirm84@gmail.com" },
+            { שם: "יוסי מרזל", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0544678306", "דואר אלקטרוני": "merzel_y@clalit.org.il" },
+            { שם: "זאב סוניס", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0507887521", "דואר אלקטרוני": "zeevz@gmc.gov.il" },
+            { שם: "מיקי הלברטל", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0502062175", "דואר אלקטרוני": "m_halberthal@rambam.health.gov.il" },
+            { שם: "שרית שחרור", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0508685583, 0542365151", "דואר אלקטרוני": "saritsk@hotmail.com" },
+            { שם: "תמר ברנשטיין", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0508685583, 0542365151", "דואר אלקטרוני": "tamber@netvision.net.il" },
+            { שם: "יאיר הופמן", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0506570303", "דואר אלקטרוני": "michalg.yair@gmail.com" },
+            { שם: "עמירם לב", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0508336658", "דואר אלקטרוני": "amiramlev@gmail.com" },
+            { שם: "יעקב סיון", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0524262020", "דואר אלקטרוני": "sivan@tauex.tau.ac.il" },
+            { שם: "גדי בר יוסף", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0502062115", "דואר אלקטרוני": "barjoseph1946@gmail.com" },
+            { שם: "שאול סופר", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0528795835", "דואר אלקטרוני": "shsofer@bgu.ac.il" },
+            { שם: "אלי הירשמן", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0502061352", "דואר אלקטרוני": "e_hershman@rambam.health.gov.il" },
+            { שם: "ציון חורי", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0526617630", "דואר אלקטרוני": "hourision@gmail.com" },
+            { שם: "צבי ארגמן", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0506299286", "דואר אלקטרוני": "argamanz@netvision.net.il" },
+            { שם: "זוהר ברזילי", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0526666075", "דואר אלקטרוני": "zohar.barzilay@sheba.health.gov.il" },
+            { שם: "גידי אשל", תפקיד: "לא צוין", "מרכז רפואי": "נוספים", "טלפון נייד": "0537345105", "דואר אלקטרוני": "geshel63@gmail.com" }
+        ];
+
+        // Helper function for wrapping labels
+        function wrapLabel(label, maxWidth = 16) {
+            if (typeof label !== 'string') return label;
+            if (label.length <= maxWidth) return [label]; 
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            if (currentLine.trim().length > 0) {
+                lines.push(currentLine.trim());
+            }
+            return lines.length > 0 ? lines : [label];
+        }
+        
+        // Tooltip configuration
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const chartColors = {
+            primary: '#2563EB',    // blue-600
+            secondary: '#3B82F6',  // blue-500
+            accent1: '#60A5FA',   // blue-400
+            accent2: '#93C5FD',   // blue-300
+            teal: '#14B8A6',       // teal-500
+            amber: '#F59E0B',     // amber-500
+            textDark: '#1E3A8A',
+            textLight: '#FFFFFF'
+        };
+        
+        Chart.defaults.font.family = "'Assistant', sans-serif";
+        Chart.defaults.font.size = 14;
+        Chart.defaults.color = chartColors.textDark;
+        Chart.defaults.borderColor = '#E5E7EB'; 
+
+        // Function to unify role names
+        function unifyRoleName(role) {
+            if (typeof role !== 'string' || !role.trim() || role.trim() === "לא צוין") {
+                return "תפקיד לא צוין";
+            }
+            let unifiedRole = role.trim();
+
+            if (unifiedRole === "מנהל" || unifiedRole === "מנהלת") {
+                return "מנהל/ת";
+            }
+            if (unifiedRole === "מ\"מ מנהל") {
+                return "מנהל/ת (מ\"מ)";
+            }
+            if (unifiedRole === "מומחה" || unifiedRole === "מומחית") {
+                return "מומחה/ית";
+            }
+            if (unifiedRole.startsWith("מתמחה")) { 
+                return "מתמחה";
+            }
+            if (unifiedRole.includes("אחות אחראית") || unifiedRole.includes("א. אחראית כללי") || unifiedRole.includes("אח אחראי")) {
+                return "אח/ות אחראי/ת";
+            }
+            if (["GOSH", "טורונטו", "אוסטרליה", "SickKids"].includes(unifiedRole)) {
+                return unifiedRole; 
+            }
+            return unifiedRole; 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const totalProfessionals = professionalData.length;
+            const correctedData = professionalData.map((p, index) => {
+                if (p['מרכז רפואי'] === "לא צוין" && index < 2 && professionalData.length > 2 && professionalData[2]['מרכז רפואי'] === "איכילוב") {
+                    return {...p, 'מרכז רפואי': "איכילוב"};
+                }
+                return p;
+            });
+            const uniqueCentersCorrected = new Set(correctedData.map(p => p['מרכז רפואי']));
+            
+            const unifiedRolesForStats = professionalData.map(p => unifyRoleName(p['תפקיד']));
+            const uniqueRoles = new Set(unifiedRolesForStats);
+
+            document.getElementById('total-professionals').textContent = totalProfessionals;
+            document.getElementById('total-centers').textContent = uniqueCentersCorrected.size;
+            document.getElementById('total-roles').textContent = uniqueRoles.size;
+
+            const centersCount = {};
+            correctedData.forEach(p => {
+                const center = p['מרכז רפואי'];
+                centersCount[center] = (centersCount[center] || 0) + 1;
+            });
+            const sortedCenters = Object.entries(centersCount).sort(([,a],[,b]) => b-a);
+            const centerLabels = sortedCenters.map(entry => wrapLabel(entry[0]));
+            const centerData = sortedCenters.map(entry => entry[1]);
+
+            new Chart(document.getElementById('professionalsByCenterChart'), {
+                type: 'bar',
+                data: {
+                    labels: centerLabels,
+                    datasets: [{
+                        label: 'מספר אנשי מקצוע',
+                        data: centerData,
+                        backgroundColor: chartColors.primary,
+                        borderColor: chartColors.secondary,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'מספר אנשי מקצוע', font: { weight: '600' } } 
+                        },
+                        y: { 
+                            title: { display: true, text: 'מרכז רפואי', font: { weight: '600' } },
+                            ticks: { autoSkip: false } 
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+
+            const rolesCount = {};
+            professionalData.forEach(p => {
+                let unifiedRole = unifyRoleName(p['תפקיד']);
+                rolesCount[unifiedRole] = (rolesCount[unifiedRole] || 0) + 1;
+            });
+            const roleLabels = Object.keys(rolesCount).map(role => wrapLabel(role));
+            const roleData = Object.values(rolesCount);
+            
+            new Chart(document.getElementById('rolesDistributionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: roleLabels,
+                    datasets: [{
+                        label: 'התפלגות תפקידים',
+                        data: roleData,
+                        backgroundColor: [
+                            chartColors.primary, chartColors.secondary, chartColors.teal, 
+                            chartColors.accent1, chartColors.accent2, chartColors.amber,
+                            '#06B6D4', '#0891B2', '#0E7490', '#155E75', '#0284C7', '#0369A1' 
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: {size: 12 } } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+
+            const filteredCentersCount = {};
+            correctedData.forEach(p => {
+                const center = p['מרכז רפואי'];
+                if (center !== "נוספים" && center !== "בחו\"ל" && center !== "מומחים ומתמחי-על" && center !== "לא צוין") {
+                   filteredCentersCount[center] = (filteredCentersCount[center] || 0) + 1;
+                }
+            });
+            const topN = 7;
+            const sortedTopCenters = Object.entries(filteredCentersCount)
+                .sort(([,a],[,b]) => b-a)
+                .slice(0, topN);
+
+            const topCenterLabels = sortedTopCenters.map(entry => wrapLabel(entry[0]));
+            const topCenterData = sortedTopCenters.map(entry => entry[1]);
+
+            new Chart(document.getElementById('topCentersChart'), {
+                type: 'bar',
+                data: {
+                    labels: topCenterLabels,
+                    datasets: [{
+                        label: 'מספר אנשי מקצוע',
+                        data: topCenterData,
+                        backgroundColor: chartColors.teal,
+                        borderColor: chartColors.primary,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'מספר אנשי מקצוע', font: { weight: '600' } }
+                        },
+                        x: {
+                             title: { display: true, text: 'מרכז רפואי', font: { weight: '600' } },
+                             ticks: { autoSkip: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
